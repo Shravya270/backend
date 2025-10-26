@@ -1,7 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
 const {CityService} = require('../services');
 const { SuccessResponse,ErrorResponse } = require('../utils/common');
-const { cityController } = require('.');
+
 
 async function createCity(req,res){
     try{
