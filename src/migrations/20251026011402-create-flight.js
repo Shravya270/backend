@@ -17,7 +17,7 @@ module.exports = {
       airplaneId: {
         type: Sequelize.INTEGER,
         allowNull:false,
-        references:{
+        references:{ //reference is used to define a foreign key relationship between tables.
           model: 'Airplanes',
           key:'id'
         },
