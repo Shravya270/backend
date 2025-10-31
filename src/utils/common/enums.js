@@ -5,6 +5,8 @@ const SEAT_TYPE = {
     FIRST_CLASS:'First-class'
 };
 
+
+
 module.exports={
     SEAT_TYPE
 }
