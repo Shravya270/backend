@@ -1,6 +1,8 @@
 const crudRepository = require('./crud-repository');
 const {Flight,Airplane,Airport,City} = require('../models');
 const {Sequelize} = require('sequelize');
+const db = require('../models')
+const {addRowLockOnFlights} = require('./queries')
 
 class FlightRepository extends crudRepository{
     constructor(){
@@ -9,7 +11,7 @@ class FlightRepository extends crudRepository{
 
 
 async getAllFlights(filter,sort){
-    const response = await Flight.findAll({
+    const response = await Flight.findAll({ //findAll is a inbuilt method
         where:filter,
         order:sort, //this will sort when query.sort is checked in flightService
         include:[
@@ -47,6 +49,30 @@ async getAllFlights(filter,sort){
 
     });
     return response;
+    }
+
+    async updateRemainingSeats(flightId,seats,dec=true){ //increment and decrement are inbuilt methods
+        await db.sequelize.query(addRowLockOnFlights(flightId))
+        const flight = await Flight.findByPk(flightId);
+        if(parseInt(dec)){ //false -> 0
+            await flight.decrement('totalSeats', {by:seats});
+        }
+        else{
+            await flight.increment('totalSeats', {by:seats});
+        }
+        return flight;
+
+        //since the below code was not saving the updated total seats in the json file and only updating in the table we improve the below code to save the changes in the flight
+        // const flight = await Flight.findByPk(flightId);
+        // if(dec){
+        //     const response = await flight.decrement('totalSeats', {by:seats});
+        //     return response;
+        // }
+        // else{
+        //     const response = await flight.increment('totalSeats', {by:seats});
+        //     return response;
+        // }
+        //the above improved code also doesn't work lol
     }
 }
 module.exports = FlightRepository;
