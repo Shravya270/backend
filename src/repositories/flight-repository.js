@@ -54,7 +54,7 @@ async getAllFlights(filter,sort){
     async updateRemainingSeats(flightId,seats,dec=true){ //increment and decrement are inbuilt methods
         await db.sequelize.query(addRowLockOnFlights(flightId))
         const flight = await Flight.findByPk(flightId);
-        if(parseInt(dec)){ //false -> 0
+        if(+dec){ //false -> 0 shorthand for converting boolean to number
             await flight.decrement('totalSeats', {by:seats});
         }
         else{
