@@ -52,15 +52,24 @@ async getAllFlights(filter,sort){
     }
 
     async updateRemainingSeats(flightId,seats,dec=true){ //increment and decrement are inbuilt methods
-        await db.sequelize.query(addRowLockOnFlights(flightId))
-        const flight = await Flight.findByPk(flightId);
-        if(+dec){ //false -> 0 shorthand for converting boolean to number
-            await flight.decrement('totalSeats', {by:seats});
+        const transaction = await db.sequelize.transaction();
+        try{
+            await db.sequelize.query(addRowLockOnFlights(flightId))
+            const flight = await Flight.findByPk(flightId);
+            if(+dec){ //false -> 0 shorthand for converting boolean to number
+                await flight.decrement('totalSeats', {by:seats},{transaction:transaction});
+            }
+            else{
+                await flight.increment('totalSeats', {by:seats},{transaction:transaction});
+            }
+            await transaction.commit();
+            return flight;
         }
-        else{
-            await flight.increment('totalSeats', {by:seats});
+        catch(error){
+            await transaction.rollback();
+            throw error;
         }
-        return flight;
+        
 
         //since the below code was not saving the updated total seats in the json file and only updating in the table we improve the below code to save the changes in the flight
         // const flight = await Flight.findByPk(flightId);
